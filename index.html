@@ -2,134 +2,177 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>ACCESS SYSTEM</title>
+<title>TECH SCRIPT PANEL</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
-* {
-    box-sizing: border-box;
-    font-family: 'Orbitron', sans-serif;
+*{box-sizing:border-box;font-family:'Orbitron',sans-serif}
+body{
+    margin:0;
+    background:radial-gradient(circle at top,#0f2027,#000);
+    color:#0ff;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
-
-body {
-    margin: 0;
-    height: 100vh;
-    background: radial-gradient(circle at top, #0f2027, #000);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #0ff;
+.container{
+    width:95%;
+    max-width:800px;
+    background:rgba(0,0,0,.8);
+    border:2px solid #0ff;
+    box-shadow:0 0 30px #0ff;
+    padding:20px;
 }
-
-/* ===== LOGIN ===== */
-#login {
-    background: rgba(0,0,0,0.7);
-    border: 2px solid #0ff;
-    padding: 30px;
-    width: 90%;
-    max-width: 350px;
-    text-align: center;
-    box-shadow: 0 0 30px #0ff;
-    animation: glow 2s infinite alternate;
+.tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
 }
-
-#login h1 {
-    margin-bottom: 20px;
+.tabs button{
+    flex:1;
+    padding:10px;
+    background:black;
+    border:1px solid #0ff;
+    color:#0ff;
+    cursor:pointer;
 }
-
-input {
-    width: 100%;
-    padding: 12px;
-    background: black;
-    border: 1px solid #0ff;
-    color: #0ff;
-    outline: none;
-    margin-bottom: 15px;
+.tabs button.active{
+    background:#0ff;
+    color:black;
 }
-
-button {
-    width: 100%;
-    padding: 12px;
-    background: #0ff;
-    color: black;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
+textarea{
+    width:100%;
+    height:180px;
+    background:black;
+    border:1px solid #0ff;
+    color:#0f0;
+    padding:10px;
 }
-
-button:hover {
-    box-shadow: 0 0 15px #0ff;
+.script-card{
+    border:1px solid #0ff;
+    padding:10px;
+    margin-bottom:10px;
 }
-
-/* ===== DASHBOARD ===== */
-#panel {
-    display: none;
-    width: 95%;
-    max-width: 700px;
-    background: rgba(0,0,0,0.75);
-    border: 2px solid #0ff;
-    box-shadow: 0 0 40px #0ff;
-    padding: 20px;
+.script-card button{
+    margin-top:8px;
+    width:100%;
+    padding:8px;
+    background:#0ff;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
 }
-
-textarea {
-    width: 100%;
-    height: 200px;
-    background: black;
-    border: 1px solid #0ff;
-    color: #0f0;
-    padding: 10px;
-    outline: none;
-}
-
-@keyframes glow {
-    from { box-shadow: 0 0 10px #0ff; }
-    to { box-shadow: 0 0 30px #0ff; }
-}
+.hidden{display:none}
 </style>
 </head>
+
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-    <h1>SYSTEM ACCESS</h1>
-    <input type="password" id="password" placeholder="Digite a senha">
-    <button onclick="login()">ENTRAR</button>
-    <p id="error" style="color:red;"></p>
+<div id="login" class="container">
+    <h2>🔐 SYSTEM ACCESS</h2>
+    <input id="pass" type="password" placeholder="Senha"
+        style="width:100%;padding:10px;background:black;border:1px solid #0ff;color:#0ff">
+    <br><br>
+    <button onclick="login()" style="width:100%;padding:10px;background:#0ff;border:none;font-weight:bold">
+        ENTRAR
+    </button>
+    <p id="err" style="color:red"></p>
 </div>
 
-<!-- PAINEL -->
-<div id="panel">
-    <h2>🔐 PAINEL SECRETO</h2>
-    <p>Cole seu script abaixo:</p>
-    <textarea id="code" placeholder="// cole seu script aqui"></textarea>
-    <br><br>
-    <button onclick="runCode()">EXECUTAR SCRIPT</button>
+<div id="panel" class="container hidden">
+    <div class="tabs">
+        <button id="tabRun" class="active" onclick="showTab('run')">Executar Script</button>
+        <button id="tabSaved" onclick="showTab('saved')">Meus Scripts</button>
+    </div>
+
+    <!-- EXECUTAR -->
+    <div id="runTab">
+        <textarea id="code" placeholder="// cole um script aqui"></textarea>
+        <br><br>
+        <button onclick="runCode()" style="width:100%;padding:10px;background:#0ff;border:none;font-weight:bold">
+            EXECUTAR
+        </button>
+    </div>
+
+    <!-- SALVOS -->
+    <div id="savedTab" class="hidden"></div>
 </div>
 
 <script>
-const senhaCorreta = "senha123";
+const PASSWORD = "luckycreator";
 
-function login() {
-    const senha = document.getElementById("password").value;
-    if (senha === senhaCorreta) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("panel").style.display = "block";
-    } else {
-        document.getElementById("error").innerText = "❌ Senha incorreta";
+/* ===== LISTA DE SCRIPTS SALVOS ===== */
+const scripts = [
+{
+name:"Script OP Steal",
+code:`loadstring(game:HttpGet("https://protected-roblox-scripts.onrender.com/5a5dad0ae01cd0d6c9f1a2c697e2efb7"))()`
+},
+{
+name:"AUTO BLOCK",
+code:`loadstring(game:HttpGet("https://raw.githubusercontent.com/sabscripts063-cloud/Kdml-Not-Me/refs/heads/main/BlockPlayer"))()`
+},
+{
+name:"Destroy Tsunami",
+code:`loadstring(game:HttpGet("https://pastefy.app/YjkseF25/raw"))()`
+},
+{
+name:"Rat Hub X",
+code:`loadstring(game:HttpGet("https://rawscripts.net/raw/Escape-Tsunami-For-Brainrots!-Rat-Hub-X-84016"))()`
+},
+{
+name:"Lusion Hub",
+code:`loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/d48b61cca0abe4468342a5a1937c9b3c2380057dc27f55731ed6e5371cef45b4/download"))()`
+}
+];
+
+function login(){
+    if(pass.value===PASSWORD){
+        document.getElementById("login").style.display="none";
+        document.getElementById("panel").classList.remove("hidden");
+        loadScripts();
+    }else{
+        document.getElementById("err").innerText="Senha incorreta";
     }
 }
 
-function runCode() {
-    try {
-        eval(document.getElementById("code").value);
-        alert("✅ Script executado!");
-    } catch (e) {
-        alert("❌ Erro no script");
+function showTab(tab){
+    document.getElementById("runTab").classList.add("hidden");
+    document.getElementById("savedTab").classList.add("hidden");
+    document.getElementById("tabRun").classList.remove("active");
+    document.getElementById("tabSaved").classList.remove("active");
+
+    if(tab==="run"){
+        document.getElementById("runTab").classList.remove("hidden");
+        document.getElementById("tabRun").classList.add("active");
+    }else{
+        document.getElementById("savedTab").classList.remove("hidden");
+        document.getElementById("tabSaved").classList.add("active");
+    }
+}
+
+function runCode(code){
+    try{
+        eval(code || document.getElementById("code").value);
+        alert("Script executado");
+    }catch(e){
+        alert("Erro no script");
         console.error(e);
     }
+}
+
+function loadScripts(){
+    const savedTab = document.getElementById("savedTab");
+    savedTab.innerHTML="";
+    scripts.forEach(s=>{
+        const div=document.createElement("div");
+        div.className="script-card";
+        div.innerHTML=`<b>${s.name}</b><br>
+        <button onclick="runCode(\`${s.code}\`)">EXECUTAR</button>`;
+        savedTab.appendChild(div);
+    });
 }
 </script>
 
