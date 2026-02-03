@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>TECH SCRIPT PANEL</title>
+<title>LuckySiteTech</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -21,68 +21,77 @@ body{
 .container{
     width:95%;
     max-width:800px;
-    background:rgba(0,0,0,.8);
+    background:rgba(0,0,0,.85);
     border:2px solid #0ff;
     box-shadow:0 0 30px #0ff;
     padding:20px;
+    animation:fadeIn .6s ease;
 }
-.tabs{
-    display:flex;
-    gap:10px;
-    margin-bottom:15px;
+@keyframes fadeIn{
+    from{opacity:0;transform:translateY(10px)}
+    to{opacity:1;transform:none}
 }
-.tabs button{
-    flex:1;
-    padding:10px;
+h2,h3{margin-top:0}
+input{
+    width:100%;
+    padding:12px;
     background:black;
     border:1px solid #0ff;
     color:#0ff;
-    cursor:pointer;
 }
-.tabs button.active{
-    background:#0ff;
-    color:black;
-}
-textarea{
+button{
     width:100%;
-    height:180px;
-    background:black;
-    border:1px solid #0ff;
-    color:#0f0;
-    padding:10px;
-}
-.script-card{
-    border:1px solid #0ff;
-    padding:10px;
-    margin-bottom:10px;
-}
-.script-card button{
-    margin-top:8px;
-    width:100%;
-    padding:8px;
+    padding:12px;
     background:#0ff;
     border:none;
     font-weight:bold;
     cursor:pointer;
 }
+button:hover{box-shadow:0 0 15px #0ff}
+
+.tabs{
+    display:flex; gap:10px; margin-bottom:15px;
+}
+.tabs button{
+    flex:1; background:black; border:1px solid #0ff; color:#0ff;
+}
+.tabs button.active{background:#0ff;color:black}
+
+textarea{
+    width:100%; height:180px; background:black;
+    border:1px solid #0ff; color:#0f0; padding:10px;
+}
+.script-card{
+    border:1px solid #0ff; padding:10px; margin-bottom:10px;
+    animation:fadeIn .4s ease;
+}
+.script-card button{margin-top:8px}
+
 .hidden{display:none}
+.wave{
+    animation:wave 1.2s ease-in-out infinite alternate;
+}
+@keyframes wave{
+    from{text-shadow:0 0 5px #0ff}
+    to{text-shadow:0 0 20px #0ff}
+}
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN POR USUÁRIO -->
 <div id="login" class="container">
-    <h2>🔐 SYSTEM ACCESS</h2>
-    <input id="pass" type="password" placeholder="Senha"
-        style="width:100%;padding:10px;background:black;border:1px solid #0ff;color:#0ff">
+    <h2>👤 ENTRAR</h2>
+    <input id="username" placeholder="Digite seu nome">
     <br><br>
-    <button onclick="login()" style="width:100%;padding:10px;background:#0ff;border:none;font-weight:bold">
-        ENTRAR
-    </button>
-    <p id="err" style="color:red"></p>
+    <button onclick="enter()">ENTRAR</button>
 </div>
 
+<!-- PAINEL -->
 <div id="panel" class="container hidden">
+    <h3 class="wave" id="welcome"></h3>
+
     <div class="tabs">
         <button id="tabRun" class="active" onclick="showTab('run')">Executar Script</button>
         <button id="tabSaved" onclick="showTab('saved')">Meus Scripts</button>
@@ -92,9 +101,7 @@ textarea{
     <div id="runTab">
         <textarea id="code" placeholder="// cole um script aqui"></textarea>
         <br><br>
-        <button onclick="runCode()" style="width:100%;padding:10px;background:#0ff;border:none;font-weight:bold">
-            EXECUTAR
-        </button>
+        <button onclick="runCode()">EXECUTAR</button>
     </div>
 
     <!-- SALVOS -->
@@ -102,9 +109,7 @@ textarea{
 </div>
 
 <script>
-const PASSWORD = "luckycreator";
-
-/* ===== LISTA DE SCRIPTS SALVOS ===== */
+/* ===== SCRIPTS SALVOS ===== */
 const scripts = [
 {
 name:"Script OP Steal",
@@ -128,31 +133,38 @@ code:`loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/d4
 }
 ];
 
-function login(){
-    if(pass.value===PASSWORD){
-        document.getElementById("login").style.display="none";
-        document.getElementById("panel").classList.remove("hidden");
-        loadScripts();
-    }else{
-        document.getElementById("err").innerText="Senha incorreta";
-    }
+/* ===== LOGIN SIMPLES ===== */
+function enter(){
+    const name = document.getElementById("username").value.trim();
+    if(!name) return;
+    localStorage.setItem("luckyUser", name);
+    showPanel(name);
 }
+function showPanel(name){
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("panel").classList.remove("hidden");
+    document.getElementById("welcome").innerText = `Olá ${name}, seja bem-vindo`;
+    loadScripts();
+}
+const savedUser = localStorage.getItem("luckyUser");
+if(savedUser) showPanel(savedUser);
 
+/* ===== ABAS ===== */
 function showTab(tab){
-    document.getElementById("runTab").classList.add("hidden");
-    document.getElementById("savedTab").classList.add("hidden");
-    document.getElementById("tabRun").classList.remove("active");
-    document.getElementById("tabSaved").classList.remove("active");
-
+    runTab.classList.add("hidden");
+    savedTab.classList.add("hidden");
+    tabRun.classList.remove("active");
+    tabSaved.classList.remove("active");
     if(tab==="run"){
-        document.getElementById("runTab").classList.remove("hidden");
-        document.getElementById("tabRun").classList.add("active");
+        runTab.classList.remove("hidden");
+        tabRun.classList.add("active");
     }else{
-        document.getElementById("savedTab").classList.remove("hidden");
-        document.getElementById("tabSaved").classList.add("active");
+        savedTab.classList.remove("hidden");
+        tabSaved.classList.add("active");
     }
 }
 
+/* ===== EXECUTAR ===== */
 function runCode(code){
     try{
         eval(code || document.getElementById("code").value);
@@ -163,8 +175,8 @@ function runCode(code){
     }
 }
 
+/* ===== CARREGAR SCRIPTS ===== */
 function loadScripts(){
-    const savedTab = document.getElementById("savedTab");
     savedTab.innerHTML="";
     scripts.forEach(s=>{
         const div=document.createElement("div");
