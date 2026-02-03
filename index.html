@@ -9,36 +9,60 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
 *{box-sizing:border-box;font-family:'Orbitron',sans-serif}
+
 body{
     margin:0;
+    min-height:100vh;
     background:radial-gradient(circle at top,#0f2027,#000);
     color:#0ff;
-    min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
+    overflow:hidden;
 }
+
+/* FUNDO ANIMADO */
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(0,255,255,.05) 0px,
+        rgba(0,255,255,.05) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+    pointer-events:none;
+}
+
 .container{
     width:95%;
-    max-width:800px;
+    max-width:850px;
     background:rgba(0,0,0,.85);
     border:2px solid #0ff;
-    box-shadow:0 0 30px #0ff;
+    box-shadow:0 0 35px #0ff;
     padding:20px;
     animation:fadeIn .6s ease;
 }
+
 @keyframes fadeIn{
-    from{opacity:0;transform:translateY(10px)}
+    from{opacity:0;transform:translateY(15px)}
     to{opacity:1;transform:none}
 }
+
 h2,h3{margin-top:0}
+
 input{
     width:100%;
     padding:12px;
     background:black;
     border:1px solid #0ff;
     color:#0ff;
+    outline:none;
 }
+
 button{
     width:100%;
     padding:12px;
@@ -47,40 +71,78 @@ button{
     font-weight:bold;
     cursor:pointer;
 }
-button:hover{box-shadow:0 0 15px #0ff}
+button:hover{
+    box-shadow:0 0 20px #0ff;
+}
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.logout{
+    width:auto;
+    padding:6px 12px;
+    font-size:12px;
+}
 
 .tabs{
-    display:flex; gap:10px; margin-bottom:15px;
+    display:flex;
+    gap:10px;
+    margin-bottom:15px;
 }
 .tabs button{
-    flex:1; background:black; border:1px solid #0ff; color:#0ff;
+    flex:1;
+    background:black;
+    border:1px solid #0ff;
+    color:#0ff;
 }
-.tabs button.active{background:#0ff;color:black}
+.tabs button.active{
+    background:#0ff;
+    color:black;
+}
 
 textarea{
-    width:100%; height:180px; background:black;
-    border:1px solid #0ff; color:#0f0; padding:10px;
+    width:100%;
+    height:180px;
+    background:black;
+    border:1px solid #0ff;
+    color:#0f0;
+    padding:10px;
 }
+
 .script-card{
-    border:1px solid #0ff; padding:10px; margin-bottom:10px;
+    border:1px solid #0ff;
+    padding:10px;
+    margin-bottom:10px;
     animation:fadeIn .4s ease;
 }
-.script-card button{margin-top:8px}
+.script-card button{
+    margin-top:8px;
+}
 
 .hidden{display:none}
+
 .wave{
     animation:wave 1.2s ease-in-out infinite alternate;
 }
 @keyframes wave{
     from{text-shadow:0 0 5px #0ff}
-    to{text-shadow:0 0 20px #0ff}
+    to{text-shadow:0 0 25px #0ff}
+}
+
+.credits{
+    line-height:1.8;
+    animation:fadeIn .6s ease;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN POR USUÁRIO -->
+<!-- LOGIN -->
 <div id="login" class="container">
     <h2>👤 ENTRAR</h2>
     <input id="username" placeholder="Digite seu nome">
@@ -90,11 +152,15 @@ textarea{
 
 <!-- PAINEL -->
 <div id="panel" class="container hidden">
-    <h3 class="wave" id="welcome"></h3>
+    <div class="top">
+        <h3 class="wave" id="welcome"></h3>
+        <button class="logout" onclick="logout()">SAIR</button>
+    </div>
 
     <div class="tabs">
         <button id="tabRun" class="active" onclick="showTab('run')">Executar Script</button>
         <button id="tabSaved" onclick="showTab('saved')">Meus Scripts</button>
+        <button id="tabCredits" onclick="showTab('credits')">Créditos</button>
     </div>
 
     <!-- EXECUTAR -->
@@ -106,10 +172,19 @@ textarea{
 
     <!-- SALVOS -->
     <div id="savedTab" class="hidden"></div>
+
+    <!-- CRÉDITOS -->
+    <div id="creditsTab" class="hidden credits">
+        <p>
+            Adrian Miguel conhecido como <b>LuckyziinCreator</b><br><br>
+            Script feito no dia <b>Terça feira do dia 3 de fevereiro de 2026</b><br><br>
+            Criador por <b>LuckyziinGod</b> e <b>MadaraCreatorMessage</b>
+        </p>
+    </div>
 </div>
 
 <script>
-/* ===== SCRIPTS SALVOS ===== */
+/* ===== SCRIPTS ===== */
 const scripts = [
 {
 name:"Script OP Steal",
@@ -133,57 +208,66 @@ code:`loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/d4
 }
 ];
 
-/* ===== LOGIN SIMPLES ===== */
+/* LOGIN */
 function enter(){
-    const name = document.getElementById("username").value.trim();
+    const name=username.value.trim();
     if(!name) return;
-    localStorage.setItem("luckyUser", name);
+    localStorage.setItem("luckyUser",name);
     showPanel(name);
 }
 function showPanel(name){
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("panel").classList.remove("hidden");
-    document.getElementById("welcome").innerText = `Olá ${name}, seja bem-vindo`;
+    login.classList.add("hidden");
+    panel.classList.remove("hidden");
+    welcome.innerText=`Olá ${name}, seja bem-vindo`;
     loadScripts();
 }
-const savedUser = localStorage.getItem("luckyUser");
-if(savedUser) showPanel(savedUser);
+function logout(){
+    localStorage.removeItem("luckyUser");
+    location.reload();
+}
+const saved=localStorage.getItem("luckyUser");
+if(saved) showPanel(saved);
 
-/* ===== ABAS ===== */
+/* ABAS */
 function showTab(tab){
     runTab.classList.add("hidden");
     savedTab.classList.add("hidden");
+    creditsTab.classList.add("hidden");
     tabRun.classList.remove("active");
     tabSaved.classList.remove("active");
+    tabCredits.classList.remove("active");
+
     if(tab==="run"){
         runTab.classList.remove("hidden");
         tabRun.classList.add("active");
-    }else{
+    }else if(tab==="saved"){
         savedTab.classList.remove("hidden");
         tabSaved.classList.add("active");
+    }else{
+        creditsTab.classList.remove("hidden");
+        tabCredits.classList.add("active");
     }
 }
 
-/* ===== EXECUTAR ===== */
+/* EXECUTAR */
 function runCode(code){
     try{
-        eval(code || document.getElementById("code").value);
+        eval(code || code.value);
         alert("Script executado");
     }catch(e){
         alert("Erro no script");
-        console.error(e);
     }
 }
 
-/* ===== CARREGAR SCRIPTS ===== */
+/* CARREGAR */
 function loadScripts(){
     savedTab.innerHTML="";
     scripts.forEach(s=>{
-        const div=document.createElement("div");
-        div.className="script-card";
-        div.innerHTML=`<b>${s.name}</b><br>
+        const d=document.createElement("div");
+        d.className="script-card";
+        d.innerHTML=`<b>${s.name}</b><br>
         <button onclick="runCode(\`${s.code}\`)">EXECUTAR</button>`;
-        savedTab.appendChild(div);
+        savedTab.appendChild(d);
     });
 }
 </script>
